@@ -37,18 +37,24 @@ def get_all_last_price():
 
 
 def main():
-    CTP_MD_API.login("tcp://101.230.216.141:42313")
-    spot = '510300'
-    option_info_list = get_option_info(spot)
-    code_set = set()
-    for i in option_info_list:
-        code_set.add(i['code'])
-        code_set.add(i['underlying'])
-    # print(code_list)
-    CTP_MD_API.subscribe(list(code_set))
-    while True:
-        time.sleep(5)
-        print(get_all_last_price())
+    if CTP_MD_API.login("tcp://101.230.216.141:42313",
+                        "tcp://101.230.216.141:42313",
+                        "tcp://101.230.216.141:42313",
+                        15000):
+        spot = '510300'
+        option_info_list = get_option_info(spot)
+        code_set = set()
+        for i in option_info_list:
+            code_set.add(i['code'])
+            code_set.add(i['underlying'])
+        # print(code_list)
+        CTP_MD_API.subscribe(list(code_set))
+        while True:
+            time.sleep(5)
+            print(CTP_MD_API.is_connected())
+            print(get_all_last_price())
+    else:
+        print("登陆失败", CTP_MD_API.is_connected())
 
 
 if __name__ == '__main__':

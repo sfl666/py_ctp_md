@@ -5,7 +5,7 @@ Email: shifulin666@qq.com
 """
 import os
 from ctypes import CDLL, POINTER, create_string_buffer, cast, byref
-from ctypes import Structure, c_char_p, c_void_p, c_char, c_int, c_double
+from ctypes import Structure, c_char_p, c_void_p, c_char, c_int, c_double, c_bool, c_ulong
 
 
 class DepthMarketData(Structure):
@@ -75,11 +75,27 @@ class MD(object):
         self._get_tick_data.argtypes = [c_char_p]
         self._get_tick_data.restype = c_void_p
 
-    def login(self, front_addr):
-        self.dll.login(c_char_p(front_addr.encode()))
+        self._is_api_ok = self.dll.is_api_ok
+        self._is_api_ok.argtypes = []
+        self._is_api_ok.restype = c_bool
+
+        self._is_connected = self.dll.is_connected
+        self._is_connected.argtypes = []
+        self._is_connected.restype = c_bool
+
+        self._login = self.dll.login
+        self._login.argtypes = [c_char_p, c_char_p, c_char_p, c_ulong]
+        self._login.restype = c_int
+
+    def login(self, front_addr1, front_addr2, front_addr3, timeout_ms):
+        return self._login(c_char_p(front_addr1.encode()), c_char_p(front_addr2.encode()),
+                           c_char_p(front_addr3.encode()), timeout_ms) == 1
 
     def is_ok(self):
-        return self.dll.is_api_ok()
+        return self._is_api_ok()
+
+    def is_connected(self):
+        return self._is_connected()
 
     def subscribe(self, instrument_list):
         length = len(instrument_list)
